@@ -1,0 +1,32 @@
+{
+  "name": "ecommerce-portal",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "start": "node server/index.js",
+    "serve": "npm run build && npm start",
+    "db:seed": "node server/db/seed.js",
+    "db:seed:mysql": "node server/db/seed-mysql.js",
+    "db:auth:migrate": "npx auth@latest migrate --config server/auth.js -y"
+  },
+  "dependencies": {
+    "@neondatabase/serverless": "^0.10.1",
+    "better-auth": "^1.7.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.21.0",
+    "morgan": "^1.10.0",
+    "mysql2": "^3.11.3",
+    "pg": "^8.23.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-router-dom": "^6.26.2"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^4.3.1",
+    "vite": "^5.4.8"
+  }
+}
