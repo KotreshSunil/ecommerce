@@ -8,3 +8,4 @@ dist
 # Standalone sibling projects with their own git repos
 /airline-booking-portal/
 /tennis-court-booking/
+/restaurant-reservations/
