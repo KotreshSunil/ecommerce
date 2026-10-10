@@ -4,3 +4,7 @@ dist
 *.local
 .env
 .claude/settings.local.json
+
+# Standalone sibling projects with their own git repos
+/airline-booking-portal/
+/tennis-court-booking/
