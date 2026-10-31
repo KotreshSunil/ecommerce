@@ -17,7 +17,9 @@ A small e-commerce demo ("ecommerce-portal"): a React SPA (Vite) served by an Ex
 - `npm run db:seed:mysql` — same, but against TiDB Serverless (MySQL-flavored schema, same seed data). Not wired to Better Auth — see Authentication below.
 - `npm run db:auth:migrate` — runs Better Auth's own CLI (`npx auth@latest migrate --config server/auth.js`) to create/update its `user`/`session`/`account`/`verification` tables directly in Neon Postgres. Re-run after changing `server/auth.js`'s config (e.g. adding a plugin) in a way that changes the schema.
 
-There is no test suite and no lint config in this repo currently.
+- `E2E_DATABASE_URL='<throwaway test DB>' npm run test:e2e` — Playwright UI regression suite (`e2e/*.spec.js`, config in `playwright.config.js`). Single file: `... npx playwright test e2e/cart.spec.js`; single test: `-g "title"`. `npm run test:e2e:report` opens the HTML report (`e2e-report/`; traces/videos of failures in `e2e-results/`). See "E2E tests" below before running.
+
+There is no lint config and no unit-test suite; the Playwright suite is the only test suite.
 
 ## Environment
 
@@ -43,5 +45,19 @@ Both sides store prices as fixed-point decimals (`NUMERIC` in Postgres, `DECIMAL
 **Frontend state**: cart state lives in `src/context/CartContext.jsx`, a React Context provider wrapping the whole app in `App.jsx`. It persists to `localStorage` via the generic `src/hooks/useLocalStorage.js` hook (key `ecommerce_cart`) rather than calling an API — the cart is client-only until checkout. `Checkout.jsx` is what POSTs the cart to `/api/orders` and clears it on success.
 
 **Routing**: plain `react-router-dom` `BrowserRouter` in `App.jsx` with product list (`/`), product detail (`/product/:id`), cart (`/cart`), checkout (`/checkout`, gated by `RequireAuth`), `/login`, `/register`, and `/orders` (also gated). Pages fetch their own data with `useEffect` + `fetch` (no data-fetching library); loading/error states are handled per-page with local `status` state (`'loading' | 'ready' | 'error'`, or `'idle' | 'submitting' | 'error'` for the auth forms).
+
+**E2E tests (Playwright).** Created/run via the `e2e-test-suite-ui-playwright` skill (`../.claude/skills/`), which also holds the reusable templates for the infrastructure in `e2e/support/`.
+- Always headed (`headless: false` in `playwright.config.js`) — never change that.
+- Needs a NEW, disposable Postgres URL in `E2E_DATABASE_URL` on every run; never use the app's `.env` `DATABASE_URL`. `e2e/support/db-guard.js` refuses to run if it matches the app's DB. `global-setup.js` **drops the whole `public` schema** in that DB, then runs `npm run db:auth:migrate` and `npm run db:seed`, so every run starts blank.
+- `webServer` builds and boots its own server on port 3100 (`E2E_PORT` to override, never reuses an existing server) with `DATABASE_URL` overridden to the test DB (dotenv never overrides already-set env vars), dummy `TIDB_*` values (the UI never uses TiDB), and `BETTER_AUTH_URL` set to the test origin.
+- The `webServer` health check must hit a route that doesn't query the DB (`/`): the server boots before `global-setup.js` creates the schema, and an async DB error in an Express 4 route crashes the process.
+- After clicking "Sign out", wait for the signed-out UI before signing in again, otherwise the sign-out request can finish after the new login and wipe it.
+- Tests create unique users per test (`uniqueUser()`/`signedIn` fixture in `e2e/support/fixtures.js`; the `db` fixture queries the test DB to assert persisted rows). Better Auth's sign-up API requires an `Origin` header, so API sign-ups pass `origin: baseURL`. Expected catalog data is imported from `server/db/seed-data.js`, not hard-coded.
+
+**Deployment (Render).** Deployed as a single Node web service (Express serves the built `dist/`) at https://ecommerce-portal-d6tt.onrender.com (service id `srv-dbioblijnfac73b67qig`, free plan — sleeps when idle, slow first request). Defined by `render.yaml` at the *git root* (one level above this directory) with `rootDir: ecommerce`, build `npm install && npm run build`, start `npm start`, health check `/`. Auto-deploys on push to `main` of `KotreshSunil/ecommerce`. Gotchas:
+- Env vars (`DATABASE_URL`, `TIDB_*`, `BETTER_AUTH_SECRET`, `BETTER_AUTH_URL`) are set on Render, not in the repo (`sync: false` in the blueprint). Production uses the *same* Neon/TiDB databases as local `.env`, so prod and local share data.
+- `BETTER_AUTH_URL` must equal the real public URL; Render added a `-d6tt` suffix to the hostname, so changing the service name/URL means updating it and redeploying or sign-in breaks.
+- No seed/migrate step runs on deploy; schema changes require running the `db:*` scripts manually against the DB.
+- Step-by-step (including the API-driven flow) is in the `build-fullstack-react-app` skill, `references/deploy-render.md`.
 
 **Styling**: one plain CSS file per page/component under `src/styles/`, imported directly into the corresponding JSX file (no CSS modules, no CSS-in-JS, no Tailwind).
