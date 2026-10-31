@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
-import { signUp } from '../lib/auth-client'
+import { signUp, useSession } from '../lib/auth-client'
 import '../styles/Auth.css'
 
 export default function Register() {
@@ -11,6 +11,7 @@ export default function Register() {
   const [error, setError] = useState('')
   const navigate = useNavigate()
   const location = useLocation()
+  const { refetch } = useSession()
 
   function handleSubmit(e) {
     e.preventDefault()
@@ -19,7 +20,11 @@ export default function Register() {
     signUp.email(
       { name, email, password },
       {
-        onSuccess: () => navigate(location.state?.from?.pathname ?? '/', { replace: true }),
+        onSuccess: async () => {
+          // refresh the cached session first, or RequireAuth sees it as signed-out and bounces back to /login
+          await refetch()
+          navigate(location.state?.from?.pathname ?? '/', { replace: true })
+        },
         onError: (ctx) => {
           setError(ctx.error?.message ?? 'Could not create account.')
           setStatus('error')

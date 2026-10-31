@@ -11,6 +11,8 @@ This directory is a workspace of independent web-app projects, not a monorepo â€
 
 The workspace-level skill `e2e-test-suite-ui-playwright` lives in `.claude/skills/` and is meant to be reused on these apps: it scaffolds and runs a headed Playwright regression suite, and must always ask the user for a new throwaway test DB URL (never the app's own). The reference implementation is `ecommerce/e2e/`.
 
+The workspace-level subagent `log-triage` (`.claude/agents/log-triage.md`) is read-only (Read/Grep/Glob) and investigates one log file per instance for incident anomalies; launch one per log file in parallel when checking multiple services.
+
 `render.yaml` at this root is the Render Blueprint for `ecommerce/` (it uses `rootDir: ecommerce`); see `ecommerce/CLAUDE.md` for deployment details.
 
 Because `.gitignore` excludes those three directories, `git status` at the root only reflects `ecommerce/` changes. Also ignored: `node_modules`, `dist`, `.env`, `*.local`, `.claude/settings.local.json`.

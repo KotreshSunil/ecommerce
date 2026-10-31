@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
-import { signIn } from '../lib/auth-client'
+import { signIn, useSession } from '../lib/auth-client'
 import '../styles/Auth.css'
 
 export default function Login() {
@@ -9,6 +9,7 @@ export default function Login() {
   const [status, setStatus] = useState('idle')
   const navigate = useNavigate()
   const location = useLocation()
+  const { refetch } = useSession()
 
   function handleSubmit(e) {
     e.preventDefault()
@@ -17,7 +18,11 @@ export default function Login() {
     signIn.email(
       { email, password },
       {
-        onSuccess: () => navigate(location.state?.from?.pathname ?? '/', { replace: true }),
+        onSuccess: async () => {
+          // refresh the cached session first, or RequireAuth sees it as signed-out and bounces back to /login
+          await refetch()
+          navigate(location.state?.from?.pathname ?? '/', { replace: true })
+        },
         onError: () => setStatus('error'),
       }
     )

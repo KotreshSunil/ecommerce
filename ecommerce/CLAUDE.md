@@ -15,7 +15,7 @@ A small e-commerce demo ("ecommerce-portal"): a React SPA (Vite) served by an Ex
 - `npm run serve` — build then start the Express server (`build && start`) — the closest thing to a full production run locally.
 - `npm run db:seed` — create Postgres `products`/`orders` tables if missing and seed `products` from `server/db/seed-data.js`. Also adds the `orders.user_id` column if missing.
 - `npm run db:seed:mysql` — same, but against TiDB Serverless (MySQL-flavored schema, same seed data). Not wired to Better Auth — see Authentication below.
-- `npm run db:auth:migrate` — runs Better Auth's own CLI (`npx auth@latest migrate --config server/auth.js`) to create/update its `user`/`session`/`account`/`verification` tables directly in Neon Postgres. Re-run after changing `server/auth.js`'s config (e.g. adding a plugin) in a way that changes the schema.
+- `npm run db:auth:migrate` — runs Better Auth's own CLI (`npx auth@latest migrate --config server/auth.js -y`, non-interactive) to create/update its `user`/`session`/`account`/`verification` tables directly in Neon Postgres. Re-run after changing `server/auth.js`'s config (e.g. adding a plugin) in a way that changes the schema.
 
 - `E2E_DATABASE_URL='<throwaway test DB>' npm run test:e2e` — Playwright UI regression suite (`e2e/*.spec.js`, config in `playwright.config.js`). Single file: `... npx playwright test e2e/cart.spec.js`; single test: `-g "title"`. `npm run test:e2e:report` opens the HTML report (`e2e-report/`; traces/videos of failures in `e2e-results/`). See "E2E tests" below before running.
 

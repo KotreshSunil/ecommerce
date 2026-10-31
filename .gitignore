@@ -9,3 +9,7 @@ dist
 /airline-booking-portal/
 /tennis-court-booking/
 /restaurant-reservations/
+
+# Playwright e2e artifacts
+e2e-report/
+e2e-results/

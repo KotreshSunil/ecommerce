@@ -11,6 +11,8 @@
     "serve": "npm run build && npm start",
     "db:seed": "node server/db/seed.js",
     "db:seed:mysql": "node server/db/seed-mysql.js",
+    "test:e2e": "playwright test",
+    "test:e2e:report": "playwright show-report e2e-report",
     "db:auth:migrate": "npx auth@latest migrate --config server/auth.js -y"
   },
   "dependencies": {
@@ -26,6 +28,7 @@
     "react-router-dom": "^6.26.2"
   },
   "devDependencies": {
+    "@playwright/test": "^1.64.0",
     "@vitejs/plugin-react": "^4.3.1",
     "vite": "^5.4.8"
   }
