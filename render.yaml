@@ -1,0 +1,29 @@
+services:
+  - type: web
+    name: ecommerce-portal
+    runtime: node
+    plan: free
+    rootDir: ecommerce
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    healthCheckPath: /
+    envVars:
+      - key: NODE_VERSION
+        value: 20
+      - key: DATABASE_URL
+        sync: false
+      - key: TIDB_HOST
+        sync: false
+      - key: TIDB_PORT
+        sync: false
+      - key: TIDB_USER
+        sync: false
+      - key: TIDB_PASSWORD
+        sync: false
+      - key: TIDB_DATABASE
+        sync: false
+      - key: BETTER_AUTH_SECRET
+        sync: false
+      # Set to the service's public URL, e.g. https://ecommerce-portal.onrender.com
+      - key: BETTER_AUTH_URL
+        sync: false
